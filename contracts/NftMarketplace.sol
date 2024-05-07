@@ -25,31 +25,34 @@ contract NftMarketplace is ERC721 {
 
     constructor() ERC721("NftMatketplace", "NFTM") {
         basicToken = IERC20(0x0a7180a063D06AfC0a5C69829b71062B6a4FED56);
-        Nft = IERC721(0xb08Ca63fa7Fc8c9E29f3823E5171979b5154682B);
-        nftWallet = 0x617F2E2fD72FD9D5503197092aC168c91465E7f2;
+        Nft = IERC721(0xCD4E0740d25793309303f4a121c9E9CbF06aD9b4);
     }
 
-    //argument, transfre from
+    //Listing NFT
     function listNFT(uint256 id, uint256 price) public {
-        
-        transferFrom(nftWallet, address(this), id);
-
         listings[id] = Listing({
             nftOwner: Nft.ownerOf(id),
             tokenId: id,
             price: price,
             isListed: true
         });
+        Nft.transferFrom(msg.sender, address(this), id);
     }
 
-    //transfer back
-    function delistNFT(uint256 tokenId) public {
-        listings[tokenId].isListed = false;
-        transferFrom(address(this), nftWallet, tokenId);
+    // De-listing NFT
+    function delistNFT(uint256 id) public {
+        listings[id] = Listing({
+            nftOwner: address(0),
+            tokenId: id,
+            price: 0,
+            isListed: false
+        });
+        Nft.transferFrom(address(this), msg.sender, id);
     }
 
-    function buyNFT(uint256 tokenId) public payable {
-        Listing memory listing = listings[tokenId];
+    //Buying NFT
+    function buyNFT(uint256 id) public payable {
+        Listing memory listing = listings[id];
         require(listing.isListed, "NFT not listed");
         require(
             basicToken.balanceOf(msg.sender) >= listing.price,
@@ -57,15 +60,16 @@ contract NftMarketplace is ERC721 {
         );
 
         basicToken.transferFrom(msg.sender, address(this), listing.price);
-        Nft.transferFrom(address(this), msg.sender, tokenId);
-        listings[tokenId].isListed = false;
+        Nft.transferFrom(address(this), msg.sender, id);
+        listings[id] = Listing({
+            nftOwner: address(0),
+            tokenId: id,
+            price: 0,
+            isListed: false
+        });
     }
 
     function getnftIds() public view returns (uint256) {
-        return nftIds.current();
-    }
-
-    function getsoldIds() public view returns (uint256) {
         return nftIds.current();
     }
 }
