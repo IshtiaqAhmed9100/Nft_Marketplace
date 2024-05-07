@@ -69,7 +69,4 @@ contract NftMarketplace is ERC721 {
         });
     }
 
-    function getnftIds() public view returns (uint256) {
-        return nftIds.current();
-    }
 }
