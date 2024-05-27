@@ -89,6 +89,6 @@ contract Launchpad is Ownable {
         if (saleActive = true || block.timestamp > saleDuration) {
             revert saleAlreadyEnded();
         }
-        saleActive == true;
+        saleActive == false;
     }
 }
